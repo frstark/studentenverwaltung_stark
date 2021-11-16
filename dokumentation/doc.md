@@ -25,5 +25,9 @@ exceptions:
 Service layer:
 
 ![](.doc_images/e39e4af4.png)
+![](.doc_images/962a6bc3.png)
 
+Controller layer:
+![](.doc_images/29f358db.png)
+![](.doc_images/51f2114e.png)
 
