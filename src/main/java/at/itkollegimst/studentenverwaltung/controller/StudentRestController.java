@@ -2,10 +2,15 @@ package at.itkollegimst.studentenverwaltung.controller;
 
 import at.itkollegimst.studentenverwaltung.domain.Student;
 import at.itkollegimst.studentenverwaltung.exceptions.StudentNichtGefunden;
+import at.itkollegimst.studentenverwaltung.exceptions.StudentValidierungFehlgeschlagen;
 import at.itkollegimst.studentenverwaltung.service.StudentenService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 //Technologieschicht
@@ -20,24 +25,36 @@ public class StudentRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Student>> gibAlleStudenten(){ //Wrapper gibt Http Status zurück
+    public ResponseEntity<List<Student>> gibAlleStudenten() { //Wrapper gibt Http Status zurück
 
         return ResponseEntity.ok(this.studentenService.alleStudent());
     }
 
     @PostMapping
-    public  ResponseEntity<Student> studentEinfuegen(@RequestBody Student student){
-        return ResponseEntity.ok(this.studentenService.studentEinfuegen(student));
+    public ResponseEntity<Student> studentEinfuegen(@Valid @RequestBody Student student, BindingResult bindingResult) throws StudentValidierungFehlgeschlagen {
+        String errors = "";
+        if (bindingResult.hasErrors()) {
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errors += "\nValedierungsfehler für Objekt " + error.getObjectName() +
+                        " im Feld " + ((FieldError) error).getField() + " mit folgendem Problem: " +
+                        error.getDefaultMessage();
+            }
+            throw new StudentValidierungFehlgeschlagen(errors);
+        } else {
+
+
+            return ResponseEntity.ok(this.studentenService.studentEinfuegen(student));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public String studentLoeschen(@PathVariable Long id){
+    public String studentLoeschen(@PathVariable Long id) {
         this.studentenService.studentLoeschenMitId(id);
-        return "Student gelöscht" ;
+        return "Student gelöscht";
     }
 
     @GetMapping("/mitplz/{plz}")
-    public ResponseEntity<List<Student>> alleStudentenMitPlz(@PathVariable String plz){
+    public ResponseEntity<List<Student>> alleStudentenMitPlz(@PathVariable String plz) {
         return ResponseEntity.ok(this.studentenService.alleStudentenMitPlz(plz));
     }
 
